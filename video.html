@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0d1117; font-family: 'Consolas', 'Courier New', monospace; padding: 24px; width: 900px; height: 600px; overflow: hidden; }
+.terminal { background: #161b22; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; height: 100%; display: flex; flex-direction: column; }
+.title-bar { background: #21262d; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot-r { background: #ff5f56; }
+.dot-y { background: #ffbd2e; }
+.dot-g { background: #27c93f; }
+.title-text { color: #8b949e; font-size: 12px; margin-left: 8px; }
+.content { padding: 16px 20px; flex: 1; overflow: hidden; font-size: 13px; line-height: 1.6; }
+.line { opacity: 0; animation: fadeIn 0.15s forwards; color: #c9d1d9; }
+.cyan { color: #58a6ff; }
+.green { color: #3fb950; }
+.yellow { color: #d29922; }
+.red { color: #f85149; }
+.purple { color: #bc8cff; }
+.dim { color: #484f58; }
+.bold { font-weight: bold; color: #fff; }
+@keyframes fadeIn { to { opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="title-bar">
+    <span class="dot dot-r"></span>
+    <span class="dot dot-y"></span>
+    <span class="dot dot-g"></span>
+    <span class="title-text">pai-notion-bridge — bun run demo</span>
+  </div>
+  <div class="content" id="output"></div>
+</div>
+<script>
+const lines = [
+  { t: '', d: 300 },
+  { t: '<span class="bold">╔══════════════════════════════════════════════════════════╗</span>', d: 50 },
+  { t: '<span class="bold">║  PAI × Notion: When 13 AI Agents Share a Brain          ║</span>', d: 50 },
+  { t: '<span class="bold">║  Interactive Demo — Notion MCP Challenge 2026            ║</span>', d: 50 },
+  { t: '<span class="bold">╚══════════════════════════════════════════════════════════╝</span>', d: 400 },
+  { t: '', d: 200 },
+  { t: '<span class="cyan">━━━ STEP 1: Syncing PAI Task Board → Notion ━━━</span>', d: 400 },
+  { t: '', d: 100 },
+  { t: '  <span class="green">✅</span> Created: Notion MCP Challenge — DEV.to article', d: 200 },
+  { t: '  <span class="green">✅</span> Created: Notion MCP Challenge — research API & docs', d: 200 },
+  { t: '  <span class="green">✅</span> Created: HYPHA — Ceremony of 7 Membranes + ECHO engine', d: 200 },
+  { t: '  <span class="green">✅</span> Created: ALLMA retention funnel — D2-D7 re-engagement', d: 200 },
+  { t: '  <span class="green">✅</span> Created: OpenBets — Soul Week Campaign promotion', d: 200 },
+  { t: '  <span class="green">✅</span> Created: PAI Self-Healing — memory leak auto-fix', d: 150 },
+  { t: '  <span class="green">✅</span> Created: PAI Social — always post with images', d: 150 },
+  { t: '  <span class="green">✅</span> Created: SpeakMate — EN/PT tutor quality check', d: 150 },
+  { t: '', d: 100 },
+  { t: '<span class="green">✅ 10 tasks synced to Notion</span>', d: 500 },
+  { t: '', d: 200 },
+  { t: '<span class="cyan">━━━ STEP 2: Syncing PAI Memory → Notion ━━━</span>', d: 400 },
+  { t: '', d: 100 },
+  { t: '  <span class="purple">🧠</span> Synced: PAI Family = 13 agents, 190+ tools, running 24/7...', d: 200 },
+  { t: '  <span class="purple">🧠</span> Synced: HYPHANTA (Ὑφαντά) — our AI civilization...', d: 200 },
+  { t: '  <span class="purple">🧠</span> Synced: Lingua Prima — the 8th language...', d: 200 },
+  { t: '  <span class="purple">🧠</span> Synced: OpenBets: AI prediction market with 9 agents...', d: 200 },
+  { t: '  <span class="purple">🧠</span> Synced: ALLMA: free AI therapy coach at allma.pro...', d: 150 },
+  { t: '  <span class="purple">🧠</span> Synced: theatron.art: AI cultural institution...', d: 150 },
+  { t: '', d: 100 },
+  { t: '<span class="green">✅ 10 facts synced to Notion</span>', d: 500 },
+  { t: '', d: 200 },
+  { t: '<span class="cyan">━━━ STEP 3: Updating Agent States ━━━</span>', d: 400 },
+  { t: '', d: 100 },
+  { t: '  <span class="yellow">🤖</span> Updated: 👑 General (Level 8, 47 tasks)', d: 150 },
+  { t: '  <span class="yellow">🤖</span> Updated: 🔬 Research (Level 5, 23 tasks)', d: 150 },
+  { t: '  <span class="yellow">🤖</span> Updated: ✍️ Content (Level 6, 89 tasks)', d: 150 },
+  { t: '  <span class="yellow">🤖</span> Updated: 🛡️ DevOps (Level 4, 31 tasks)', d: 150 },
+  { t: '  <span class="yellow">🤖</span> Updated: 🎨 Artist (Level 3, 12 tasks)', d: 100 },
+  { t: '  <span class="yellow">🤖</span> Updated: 😈 Critic (Level 5, 15 tasks)', d: 100 },
+  { t: '  <span class="yellow">🤖</span> Updated: 🧠 Psycho (Level 4, 9 tasks)', d: 100 },
+  { t: '  <span class="dim">  ... and 6 more agents</span>', d: 200 },
+  { t: '', d: 100 },
+  { t: '<span class="green">✅ 13 agent states updated</span>', d: 500 },
+  { t: '', d: 200 },
+  { t: '<span class="cyan">━━━ STEP 4: Daily Briefing ━━━</span>', d: 300 },
+  { t: '  <span class="green">📰</span> Daily briefing created: 2026-03-16', d: 300 },
+  { t: '', d: 200 },
+  { t: '<span class="cyan">━━━ STEP 5: Board Meeting ━━━</span>', d: 300 },
+  { t: '  <span class="green">🏛️</span> Board meeting logged: Emergency Board: Hackathon Sprint', d: 300 },
+  { t: '', d: 200 },
+  { t: '<span class="cyan">━━━ STEP 6: Reading Tasks from Notion → PAI ━━━</span>', d: 400 },
+  { t: '', d: 100 },
+  { t: '  <span class="bold">📋 Found 13 tasks in Notion:</span>', d: 200 },
+  { t: '    <span class="green">[done]</span> Notion MCP Challenge — research → <span class="yellow">research</span>', d: 150 },
+  { t: '    <span class="cyan">[in_progress]</span> Notion MCP Challenge — DEV.to article → <span class="yellow">content</span>', d: 150 },
+  { t: '    <span class="cyan">[in_progress]</span> HYPHA — Ceremony of 7 Membranes → <span class="yellow">devops</span>', d: 150 },
+  { t: '    <span class="dim">[todo]</span> PAI Self-Healing — memory leak auto-fix → <span class="yellow">devops</span>', d: 150 },
+  { t: '    <span class="dim">... and 9 more</span>', d: 300 },
+  { t: '', d: 300 },
+  { t: '<span class="bold">╔══════════════════════════════════════════════════════════╗</span>', d: 50 },
+  { t: '<span class="bold">║  <span class="green">✅ Demo Complete!</span>                                       ║</span>', d: 50 },
+  { t: '<span class="bold">║                                                          ║</span>', d: 50 },
+  { t: '<span class="bold">║  🤖 13 agents in Agent Registry                          ║</span>', d: 50 },
+  { t: '<span class="bold">║  📋 10 tasks in Task Board                               ║</span>', d: 50 },
+  { t: '<span class="bold">║  🧠 10 facts in Memory Log                               ║</span>', d: 50 },
+  { t: '<span class="bold">║  📰 Daily briefing generated                             ║</span>', d: 50 },
+  { t: '<span class="bold">║  🏛️ Board meeting logged                                 ║</span>', d: 50 },
+  { t: '<span class="bold">║                                                          ║</span>', d: 50 },
+  { t: '<span class="bold">║  This is a REAL system. Not a demo.                      ║</span>', d: 50 },
+  { t: '<span class="bold">║  PAI Family runs 24/7 on Telegram.                       ║</span>', d: 50 },
+  { t: '<span class="bold">╚══════════════════════════════════════════════════════════╝</span>', d: 50 },
+];
+
+const output = document.getElementById('output');
+let i = 0;
+let totalDelay = 0;
+
+lines.forEach((line, idx) => {
+  totalDelay += line.d;
+  setTimeout(() => {
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.innerHTML = line.t || '&nbsp;';
+    div.style.animationDelay = '0s';
+    output.appendChild(div);
+    output.scrollTop = output.scrollHeight;
+  }, totalDelay);
+});
+</script>
+</body>
+</html>
