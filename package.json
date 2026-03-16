@@ -1,0 +1,19 @@
+{
+  "name": "pai-notion-bridge",
+  "version": "1.0.0",
+  "description": "PAI × Notion: When 13 AI Agents Share a Brain — Notion MCP Challenge 2026",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "sync": "bun run src/sync.ts",
+    "demo": "bun run src/demo.ts",
+    "setup": "bun run src/setup.ts"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.15",
+    "@notionhq/notion-mcp-server": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
